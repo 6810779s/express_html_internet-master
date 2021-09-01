@@ -4,31 +4,10 @@ let url = require("url");
 
 var app = http.createServer(function (request, response) {
   var _url = request.url;
-  // let queryData = url.parse(_url, true).query;
   const fullUrl = new URL("http://localhost:3000" + _url);
+  const queryData = fullUrl.searchParams;
+  const pathName = fullUrl.pathname;
 
-  let queryData = fullUrl.searchParams;
-  let pathName = fullUrl.pathname;
-  let title = queryData.get("id");
-  // console.log(queryData.get("id"));
-
-  // if (_url == "/") {
-  //   title = "Welcome";
-  // }
-  // if (_url.indexOf("/picture/") == 0) {
-  //   let imgSrc = _url.substr(1); //인덱스 1부터 끝까지
-  //   fs.readFile(imgSrc, function (err, data) {
-  //     response.writeHead(200, { "Content-Type": "image/jpeg" });
-  //     response.end(data);
-  //   });
-  //   return;
-  // }
-  // if (_url == "/favicon.ico") {
-  //   response.writeHead(404);
-  //   response.end();
-  //   return;
-  // }
-  // response.writeHead(200);
   if (pathName.indexOf("/picture/") == 0) {
     let imgSrc = pathName.substr(1); //인덱스 1부터 끝까지
     console.log(imgSrc);
@@ -38,12 +17,31 @@ var app = http.createServer(function (request, response) {
     });
     return;
   }
+
   if (pathName === "/") {
-    fs.readFile(`./data/${title}`, "utf8", function (err, description) {
-      if (title === null) {
-        title = "Welcome";
-        description = "hello node.js";
-      }
+    let title = "";
+    let description = "";
+    let list = "";
+
+    if (queryData.get("id") === null) {
+      //기본 페이지/ 첫화면일때
+      title = "Welcome";
+      description = "hello node.js";
+    } else {
+      //HTML, CSS, JavaScript중 선택 했을때
+      title = queryData.get("id");
+      description = fs.readFileSync(`./data/${title}`, "utf8");
+      //fs.readFile vs fs.readFileSync,
+      //fs.readFile('경로',"utf8", function(err,file){});
+    }
+
+    fs.readdir("./data", (err, files) => {
+      files.forEach((file) => {
+        list += `<li><a href="/?id=${file}">${file}</a></li>`;
+      });
+      
+      list = `<ul>${list}</ul>`;
+
       let template = `
   <!doctype html>
 <html>
@@ -53,11 +51,7 @@ var app = http.createServer(function (request, response) {
 </head>
 <body>
   <h1><a href="/">WEB</a></h1>
-  <ol>
-    <li><a href="/?id=HTML">HTML</a></li>
-    <li><a href="/?id=CSS">CSS</a></li>
-    <li><a href="/?id=JavaScript">JavaScript</a></li>
-  </ol>
+  ${list}
   <h2>${title}</h2>
   <p>${description}
   </p>
