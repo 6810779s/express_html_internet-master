@@ -3,6 +3,7 @@ var fs = require('fs');
 let url = require('url');
 let qs = require('querystring');
 let path = require('path');
+let sanitizeHtml = require('sanitize-html');
 
 const template = require('./lib/template.js');
 
@@ -16,7 +17,7 @@ var app = http.createServer(function (request, response) {
 
   if (pathName.indexOf('/picture/') == 0) {
     console.log(security);
-    let imgSrc = pathName.substr(1); //인덱스 1부터 끝까지
+    // let imgSrc = pathName.substr(1); //인덱스 1부터 끝까지
     fs.readFile(`picture/${security}`, function (err, data) {
       response.writeHead(200, { 'Content-Type': 'image/jpeg' });
       response.end(data);
@@ -30,6 +31,8 @@ var app = http.createServer(function (request, response) {
     let list = '';
     let body = '';
     let control = '';
+    let sanitizedTitle = '';
+    let sanitizedHtml = '';
 
     if (queryData.get('id') === null) {
       //기본 페이지/ 첫화면일때
@@ -39,12 +42,17 @@ var app = http.createServer(function (request, response) {
     } else {
       //HTML, CSS, JavaScript중 선택 했을때
       title = queryData.get('id');
+
       let securityTitle = path.parse(title).base;
       description = fs.readFileSync(`./data/${securityTitle}`, 'utf8');
+      sanitizedTitle = sanitizeHtml(title, { allowedTags: ['b', 'h1', 'h2'] });
+      sanitizedHtml = sanitizeHtml(description, {
+        allowedTags: ['b', 'h1', 'h2 '],
+      });
       control = `<a href="/create">create</a>
-      <a href="/update?id=${title}">update</a>
+      <a href="/update?id=${sanitizedTitle}">update</a>
       <form action="/process_delete" method="post">
-        <input type="hidden" name="id" value="${title}">
+        <input type="hidden" name="id" value="${sanitizedTitle}">
         <input type="submit" value="delete">
       </form>
       `;
@@ -54,7 +62,7 @@ var app = http.createServer(function (request, response) {
 
     fs.readdir('./data', (err, files) => {
       list = template.list(files, list);
-      body = `<h2>${title}</h2>${description}`;
+      body = `<h2>${sanitizedTitle}</h2>${sanitizedHtml}`;
 
       let HTML = template.html(title, list, body, control);
       response.writeHead(200);
