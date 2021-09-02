@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 let url = require('url');
 let qs = require('querystring');
+let path = require('path');
 
 const template = require('./lib/template.js');
 
@@ -10,11 +11,13 @@ var app = http.createServer(function (request, response) {
   const fullUrl = new URL('http://localhost:3000' + _url);
   const queryData = fullUrl.searchParams;
   const pathName = fullUrl.pathname;
+  // console.log('security', path.parse(pathName));
+  const security = path.parse(pathName).base;
 
   if (pathName.indexOf('/picture/') == 0) {
+    console.log(security);
     let imgSrc = pathName.substr(1); //인덱스 1부터 끝까지
-    console.log(imgSrc);
-    fs.readFile(imgSrc, function (err, data) {
+    fs.readFile(`picture/${security}`, function (err, data) {
       response.writeHead(200, { 'Content-Type': 'image/jpeg' });
       response.end(data);
     });
@@ -36,7 +39,8 @@ var app = http.createServer(function (request, response) {
     } else {
       //HTML, CSS, JavaScript중 선택 했을때
       title = queryData.get('id');
-      description = fs.readFileSync(`./data/${title}`, 'utf8');
+      let securityTitle = path.parse(title).base;
+      description = fs.readFileSync(`./data/${securityTitle}`, 'utf8');
       control = `<a href="/create">create</a>
       <a href="/update?id=${title}">update</a>
       <form action="/process_delete" method="post">
@@ -109,7 +113,9 @@ var app = http.createServer(function (request, response) {
     //원래 있는 값들
 
     let title = queryData.get('id');
-    let description = fs.readFileSync(`./data/${title}`, 'utf8');
+    let securityTitle = path.parse(title).base;
+
+    let description = fs.readFileSync(`./data/${securityTitle}`, 'utf8');
     let list = '';
     let body = '';
     let control = `<a href="/create">create</a>
@@ -160,8 +166,9 @@ var app = http.createServer(function (request, response) {
     request.on('end', function () {
       let post = qs.parse(body);
       let id = post.id;
-      console.log('id', id);
-      fs.unlink(`data/${id}`, function (err) {
+      let securityId = path.parse(id).base;
+      // console.log('id', id);
+      fs.unlink(`data/${securityId}`, function (err) {
         response.writeHead(302, { Location: `/` });
         response.end();
       });
