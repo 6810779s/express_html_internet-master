@@ -16,6 +16,6 @@ PM2 function
 > pm2 start 파일이름.js --watch --no-daemon : pm2를 시작과 동시에 로그도 켜지게 하는 것. (나가기는 컨트롤+c)
 > ->daemon :백그라운드로 실행되는 프로그램을 일걷는 단어
 > 그러므로 위 뜻은 데몬이 아닌상태로 실행되게 하라는 뜻.
-> pm2 start 파일이름.js --watch --ignore-watch"data/\*" --no-daemon : data디렉토리에 있는 모든 파일에 대해서, create, update delte등을 해도, pm2프로그램이 다시 꺼졌다 켜지지 않게함. 꺼졌다 켜지면 그전에 저장했던 메모리, 데이터가 사라지므로 프로젝트를 하다보면 곤란한 상황이 있을수도 있으므로, 사전에 방지하기위해 이렇게 실행하는것이 좋음.
+> pm2 start 파일이름.js --watch --ignore-watch="data/\*" --no-daemon : data디렉토리에 있는 모든 파일에 대해서, create, update delte등을 해도, pm2프로그램이 다시 꺼졌다 켜지지 않게함. 꺼졌다 켜지면 그전에 저장했던 메모리, 데이터가 사라지므로 프로젝트를 하다보면 곤란한 상황이 있을수도 있으므로, 사전에 방지하기위해 이렇게 실행하는것이 좋음.
 
 > "data/_ section/_" data와 section디렉토리에 있는 파일 모두다를 가리킴.

@@ -9,7 +9,7 @@ const template = require('./lib/template.js');
 
 var app = http.createServer(function (request, response) {
   var _url = request.url;
-  const fullUrl = new URL('http://localhost:3000' + _url);
+  const fullUrl = new URL('http://localhodst:3000' + _url);
   const queryData = fullUrl.searchParams;
   const pathName = fullUrl.pathname;
   // console.log('security', path.parse(pathName));
@@ -42,7 +42,7 @@ var app = http.createServer(function (request, response) {
     } else {
       //HTML, CSS, JavaScript중 선택 했을때
       title = queryData.get('id');
-
+      console.log(title);
       let securityTitle = path.parse(title).base;
       description = fs.readFileSync(`./data/${securityTitle}`, 'utf8');
       sanitizedTitle = sanitizeHtml(title, { allowedTags: ['b', 'h1', 'h2'] });
